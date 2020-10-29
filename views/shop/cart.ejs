@@ -1,0 +1,23 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+            <% if (games.length > 0) { %>
+                <ul>
+                    <% games.forEach(p => { %>
+                        <li>
+                            <p><%= p.gameData.title %> (<%= p.qty %>)</p>
+                            <form action="/cart-delete-item" method="POST">
+                                <input type="hidden" value="<%= p.gameData.id %>" name="gameId">
+                                <button class="btn" type="submit">Delete</button>
+                            </form>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <h1>No Games in Cart!</h1>
+            <% } %>
+        </main>
+        <%- include('../includes/end.ejs') %>

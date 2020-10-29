@@ -1,0 +1,40 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/game.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+
+            <main>
+                <% if (games.length > 0) { %>
+                    <div class="grid">
+                        <% for (let game of games) { %>
+                            <article class="card game-item">
+                                <header class="card__header">
+                                    <h1 class="game__title">
+                                        <%= game.title %>
+                                    </h1>
+                                </header>
+                                <div class="card__image">
+                                    <img src="<%= game.imageUrl %>" alt="<%= game.title %>">
+                                </div>
+                                <div class="card__content">
+                                    <h2 class="game__price">
+                                        $<%= game.price %>
+                                    </h2>
+                                    <p class="game__description">
+                                        <%= game.description %>
+                                    </p>
+                                </div>
+                                <div class="card__actions">
+                                    <a href="/games/<%= game.id %>" class="btn">Details</a>
+                                    <%- include('../includes/add-to-cart.ejs', {game: game}) %>
+                                </div>
+                            </article>
+                            <% } %>
+                    </div>
+                    <% } else { %>
+                        <h1>No Games Found!</h1>
+                        <% } %>
+            </main>
+            <%- include('../includes/end.ejs') %>
