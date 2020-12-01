@@ -13,10 +13,22 @@ exports.postAddGame = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const game = new Game(null, title, imageUrl, description, price);
-  game.save();
-  res.redirect('/');
-};
+  req.user
+  .createGame({
+    title: title,
+    price: price,
+    imageUrl: imageUrl,
+    description: description
+  })
+  .then(result => {
+    //console.log(result);
+    console.log('Added Game to library')
+    res.redirect('/admin/games');
+  })
+  .catch(err => {
+    console.log(err);
+  });
+}
 
 exports.getEditGame = (req, res, next) => {
   const editMode = req.query.edit;
@@ -24,7 +36,11 @@ exports.getEditGame = (req, res, next) => {
     return res.redirect('/');
   }
   const gameId = req.params.gameId;
-  Game.findById(gameId, game => {
+  req.user
+  .getGames({where: {id: gameId } })
+  //Game.findByPk(gameId)
+  .then(games => {
+    const game = games[0];
     if (!game) {
       return res.redirect('/');
     }
@@ -34,7 +50,8 @@ exports.getEditGame = (req, res, next) => {
       editing: editMode,
       game: game
     });
-  });
+  })
+  .catch(err => console.log(err)); 
 };
 
 exports.postEditGame = (req, res, next) => {
@@ -43,29 +60,43 @@ exports.postEditGame = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  const updatedGame = new Game(
-    gameId,
-    updatedTitle,
-    updatedImageUrl,
-    updatedDesc,
-    updatedPrice
-  );
-  updatedGame.save();
-  res.redirect('/admin/games');
+  Game.findByPk(gameId)
+    .then(game => { 
+      game.title = updatedTitle;
+      game.price = updatedPrice;
+      game.description = updatedDesc;
+      game.imageUrl = updatedImageUrl;
+      return game.save();
+  })
+  .then(result => {
+    console.log('UPDATED GAME');
+    res.redirect('/admin/games');
+  })
+  .catch(err => console.log(err));
 };
 
 exports.getGames = (req, res, next) => {
-  Game.fetchAll(games => {
-    res.render('admin/games', {
-      games: games,
-      pageTitle: 'Admin Games',
-      path: '/admin/games'
-    });
-  });
+  req.user
+    .getGames()
+    .then(games => {
+      res.render('admin/games', {
+        games: games,
+        pageTitle: 'Admin Games',
+        path: '/admin/games'
+      });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.postDeleteGame = (req, res, next) => {
   const gameId = req.body.gameId;
-  Game.deleteById(gameId);
-  res.redirect('/admin/games');
+  Game.findByPk(gameId)
+  .then(game => {
+    return game.destroy();
+  })
+  .then(result => {
+    console.log('DESTROYED GAME');
+    res.redirect('/admin/games');
+  })
+  .catch(err => console.log(err));
 };
